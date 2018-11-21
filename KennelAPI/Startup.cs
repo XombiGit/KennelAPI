@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using KennelAPI.Interfaces;
+using KennelAPI.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace KennelAPI
+{
+    public class Startup
+    {
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+            services.AddSingleton<IDogRepository, InMemoryDogRepository>();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                //app.UseDeveloperExceptionPage();
+            }
+
+            app.UseExceptionHandler("/Error");
+            //app.UseStatusCodePagesWithReExecute("/Error");
+
+            /*app.Use((context, next) =>
+            {
+                // Do work that doesn't write to the Response.
+                //await next.Invoke();
+                // Do logging or other work that doesn't write to the Response.
+                //throw new Exception();
+                //await context.Response.WriteAsync("Hello 2!");
+
+                return next();
+            });*/
+            app.UseMvc();
+
+            app.Run(async (context) =>
+            {
+                await context.Response.WriteAsync("Hello World!");
+            });
+        }
+    }
+}
