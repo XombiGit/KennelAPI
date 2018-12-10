@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Common.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KennelAPI.Models
+namespace KennelAPI.Services
 {
-    public class DogDto
+    public class InMemoryDogEntity : IDogEntity
     {
+        public string DogID { get; set; }
         public string Name { get; set; }
-        public int DogID { get; set; }
         public string Breed { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
@@ -17,7 +18,12 @@ namespace KennelAPI.Models
         public string SpecialNotes { get; set; }
         public int Reward { get; set; }
         public string ImageURL { get; set; }
+        public int OwnerID { get; set; }
 
-        
+        public IDogEntity Clone()
+        {
+            var copy = (InMemoryDogEntity)this.MemberwiseClone();
+            return copy;
+        }
     }
 }

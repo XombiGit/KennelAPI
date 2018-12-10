@@ -1,6 +1,11 @@
-﻿using KennelAPI.Interfaces;
+﻿using AutoMapper;
+using Common.Entities;
+using Common.Interfaces;
+using Common.Interfaces.Services;
 using KennelAPI.Models;
+using KennelAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using MongoPersistence.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +17,16 @@ namespace KennelAPI.Controllers
     public class DogController : Controller
     {
         private readonly IDogRepository _dogRepository;
+        private readonly IMailService _mailService;
 
-        public DogController(IDogRepository dogRepository)
+        public DogController(IDogRepository dogRepository, IMailService mailService)
         {
             _dogRepository = dogRepository;
+            _mailService = mailService;
         }
 
         [HttpGet("{dogId}")]
-        public IActionResult GetDog(int dogId)
+        public IActionResult GetDog(string dogId)
         {
             var dog = _dogRepository.GetDog(dogId);
 
@@ -32,7 +39,7 @@ namespace KennelAPI.Controllers
         }
 
         [HttpDelete("{dogId}")]
-        public IActionResult DeleteDog(int dogId)
+        public IActionResult DeleteDog(string dogId)
         {
             if (dogId == null)
             {
@@ -46,7 +53,11 @@ namespace KennelAPI.Controllers
                 return NotFound();
             }
 
-            _dogRepository.DeleteDog(dogToDelete);
+            IDogEntity doggie = dogToDelete.Result;
+            _dogRepository.DeleteDog(doggie);
+
+            
+            _mailService.SendMail("hello", "world");
 
             return NoContent();
         }
@@ -66,9 +77,10 @@ namespace KennelAPI.Controllers
 
             try
             {
-                _dogRepository.AddDog(dogDtoCreation.Name, dogDtoCreation.Breed, dogDtoCreation.Phone, 
-                                      dogDtoCreation.Email, dogDtoCreation.SpecialNotes, dogDtoCreation.XCoord, 
-                                      dogDtoCreation.YCoord, dogDtoCreation.Reward, dogDtoCreation.ImageURL);
+                var dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
+                dogEntity.DogID = Guid.NewGuid().ToString();
+
+                _dogRepository.AddDog(dogEntity);
             }
             catch (Exception)
             {
@@ -79,9 +91,9 @@ namespace KennelAPI.Controllers
         }
 
         [HttpPut("{dogId}")]
-        public IActionResult PutDog(int dogId, [FromBody] DogDtoUpdate dogDtoUpdate)
+        public async Task<ActionResult> PutDog(string dogId, [FromBody] DogDtoUpdate dogDtoUpdate)
         {
-            if (dogId == 0 || dogDtoUpdate == null)
+            if (dogId == null || dogDtoUpdate == null)
             {
                 return BadRequest();
             }
@@ -91,60 +103,61 @@ namespace KennelAPI.Controllers
                 return BadRequest();
             }
 
-            var dogToUpdate = _dogRepository.GetDog(dogId).Clone();
+            var aDog = await _dogRepository.GetDog(dogId);
+            var dogEntity = aDog.Clone();
 
-            if (dogToUpdate == null)
+            if (dogEntity == null)
             {
                 return NotFound();
             }
 
             if (dogDtoUpdate.Email != null)
             {
-                dogToUpdate.Email = dogDtoUpdate.Email;
+                dogEntity.Email = dogDtoUpdate.Email;
             }
 
             if (dogDtoUpdate.Breed != null)
             {
-                dogToUpdate.Breed = dogDtoUpdate.Breed;
+                dogEntity.Breed = dogDtoUpdate.Breed;
             }
 
             if (dogDtoUpdate.Name != null)
             {
-                dogToUpdate.Name = dogDtoUpdate.Name;
+                dogEntity.Name = dogDtoUpdate.Name;
             }
 
             if (dogDtoUpdate.Phone != null)
             {
-                dogToUpdate.Phone = dogDtoUpdate.Phone;
+                dogEntity.Phone = dogDtoUpdate.Phone;
             }
 
             if (dogDtoUpdate.SpecialNotes != null)
             {
-                dogToUpdate.SpecialNotes = dogDtoUpdate.SpecialNotes;
+                dogEntity.SpecialNotes = dogDtoUpdate.SpecialNotes;
             }
 
             if (dogDtoUpdate.XCoord != 0)
             {
-                dogToUpdate.XCoord = dogDtoUpdate.XCoord;
+                dogEntity.XCoord = dogDtoUpdate.XCoord;
             }
 
             if (dogDtoUpdate.YCoord != 0)
             {
-                dogToUpdate.YCoord = dogDtoUpdate.YCoord;
+                dogEntity.YCoord = dogDtoUpdate.YCoord;
             }
 
             if (dogDtoUpdate.Reward != 0)
             {
-                dogToUpdate.Reward = dogDtoUpdate.Reward;
+                dogEntity.Reward = dogDtoUpdate.Reward;
             }
 
             if (dogDtoUpdate.ImageURL != null)
             {
-                dogToUpdate.ImageURL = dogDtoUpdate.ImageURL;
+                dogEntity.ImageURL = dogDtoUpdate.ImageURL;
             }
 
 
-            _dogRepository.UpdateDog(dogToUpdate);
+            _dogRepository.UpdateDog(dogEntity);
             return NoContent();
         }
     }

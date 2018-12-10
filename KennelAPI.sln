@@ -5,7 +5,9 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KennelAPI", "KennelAPI\KennelAPI.csproj", "{AA8E9E58-D4B0-4872-B66A-D64BB0D91C24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoPersistence", "MongoPersistence\MongoPersistence.csproj", "{D924C3C0-1707-42CE-A82A-28297D019CFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoPersistence", "MongoPersistence\MongoPersistence.csproj", "{D924C3C0-1707-42CE-A82A-28297D019CFD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Interfaces\Common.csproj", "{6A252672-AE04-4C50-AA17-801010D0E030}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D924C3C0-1707-42CE-A82A-28297D019CFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D924C3C0-1707-42CE-A82A-28297D019CFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D924C3C0-1707-42CE-A82A-28297D019CFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A252672-AE04-4C50-AA17-801010D0E030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A252672-AE04-4C50-AA17-801010D0E030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A252672-AE04-4C50-AA17-801010D0E030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A252672-AE04-4C50-AA17-801010D0E030}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
