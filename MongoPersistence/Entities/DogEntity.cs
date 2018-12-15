@@ -1,4 +1,5 @@
 ﻿using Common.Entities;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,6 +9,10 @@ namespace MongoPersistence.Entities
 {
     public class DogEntity : IDogEntity
     {
+        [BsonId]
+        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+        public string _id { get; set; }
+
         public string DogID { get; set; }
         public string Name { get; set; }
         public string Breed { get; set; }

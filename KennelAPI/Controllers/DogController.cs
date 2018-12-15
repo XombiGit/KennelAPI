@@ -26,9 +26,9 @@ namespace KennelAPI.Controllers
         }
 
         [HttpGet("{dogId}")]
-        public IActionResult GetDog(string dogId)
+        public async Task<IActionResult> GetDog(string dogId)
         {
-            var dog = _dogRepository.GetDog(dogId);
+            var dog = await _dogRepository.GetDog(dogId);
 
             if (dog == null)
             {

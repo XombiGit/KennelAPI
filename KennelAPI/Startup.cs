@@ -28,7 +28,7 @@ namespace KennelAPI
                 c.Version = "2.0";
                 c.Title = "KennelAPI";
             });
-            services.AddSingleton<IDogRepository, InMemoryDogRepository>();
+            services.AddSingleton<IDogRepository, DogRepository>();
             services.AddTransient<IMailService, EmailService>();
         }
 

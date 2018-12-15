@@ -12,29 +12,31 @@ namespace MongoPersistence.Services
     public class DogRepository :IDogRepository
     {
         MongoConnectionManager _connection;
-        IMongoCollection<IDogEntity> _dogCollection;
+        IMongoCollection<DogEntity> _dogCollection;
 
         public DogRepository()
         {
             _connection = new MongoConnectionManager();
-            _dogCollection = _connection.GetCollection<IDogEntity>("DogDomain");
+            _dogCollection = _connection.GetCollection<DogEntity>("DogDomain");
         }
         
         public async void AddDog(IDogEntity dogEntity)
         {
-            await _dogCollection.InsertOneAsync(dogEntity);
+            DogEntity dog = (DogEntity) dogEntity;
+            await _dogCollection.InsertOneAsync(dog);
         }
 
         public async void DeleteDog(IDogEntity dogToDelete)
         {
             string dogId = dogToDelete.DogID;
-            await _dogCollection.DeleteOneAsync<IDogEntity>(p => p.DogID.Equals(dogId));
+            await _dogCollection.DeleteOneAsync<DogEntity>(p => p.DogID.Equals(dogId));
         }
 
         public async Task<IDogEntity> GetDog(string dogId)
         {
-            var result = await _dogCollection.Find<IDogEntity>(p => p.DogID.Equals(dogId)).FirstOrDefaultAsync();
-            return await Task.FromResult(result);
+            //IMongoCollection<DogEntity> dogEntity = (IMongoCollection<DogEntity>)_dogCollection;
+            var result = await _dogCollection.Find<DogEntity>(p => p.DogID == dogId).FirstOrDefaultAsync();
+            return result;
         }
 
         public void UpdateDog(IDogEntity dogToUpdate)
