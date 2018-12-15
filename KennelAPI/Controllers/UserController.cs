@@ -1,14 +1,14 @@
-﻿using KennelAPI.Interfaces;
-using KennelAPI.Models;
+﻿using KennelAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Interfaces;
 
 namespace KennelAPI.Controllers
 {
-    [Route("api/users")]
+   /* [Route("api/users")]
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepository;
@@ -114,5 +114,5 @@ namespace KennelAPI.Controllers
 
             return NoContent();
         }
-    }
+    }*/
 }

@@ -5,13 +5,14 @@ using System.Text;
 
 namespace MongoPersistence
 {
+    //TODO transform into Singleton
     public class MongoConnectionManager
     {
         private readonly IMongoDatabase _mongoDb;
 
         public MongoConnectionManager()
         {
-            _mongoDb = Initialize("mongodb://xombi:BigHero6.mlab.com:41167/xombikennel");
+            _mongoDb = Initialize("mongodb://Xombi:$BigHero6@ds041167.mlab.com:41167/xombikennel");
         }
 
         private IMongoDatabase Initialize(string connectionString)

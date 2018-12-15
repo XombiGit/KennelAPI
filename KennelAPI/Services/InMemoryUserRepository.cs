@@ -1,4 +1,4 @@
-﻿using KennelAPI.Interfaces;
+﻿using Common.Interfaces;
 using KennelAPI.Models;
 using System;
 using System.Collections.Generic;

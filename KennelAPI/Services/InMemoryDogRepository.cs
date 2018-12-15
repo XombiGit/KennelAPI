@@ -1,5 +1,8 @@
-﻿using KennelAPI.Interfaces;
+﻿using Common.Entities;
+using Common.Interfaces;
 using KennelAPI.Models;
+using KennelAPI.Services;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +12,7 @@ namespace KennelAPI.Services
 {
     public class InMemoryDogRepository : IDogRepository
     {
-        List<DogDto> Dogs = new List<DogDto>();
+        List<IDogEntity> Dogs = new List<IDogEntity>();
         int Count;
 
         public InMemoryDogRepository()
@@ -19,26 +22,26 @@ namespace KennelAPI.Services
 
         private void populateData()
         {
-            DogDto Dog1 = new DogDto() { Name = "Scooby", Breed = "Great Dane", Phone = "1234567",
+            var Dog1 = new InMemoryDogEntity() { Name = "Scooby", Breed = "Great Dane", Phone = "1234567",
                                          Email = "bob@hotmail.com", SpecialNotes = "Scares easily",
                                          XCoord = 23, YCoord = 25, ImageURL = "Testig not sure",
-                                         DogID = 1 };
-            DogDto Dog2 = new DogDto() { Name = "Snowy", Breed = "Wire Fox Terrier", Phone = "1237567",
+                                         DogID = "1" };
+            var Dog2 = new InMemoryDogEntity() { Name = "Snowy", Breed = "Wire Fox Terrier", Phone = "1237567",
                                          Email = "jen@hotmail.com", SpecialNotes = "Very funny",
                                          XCoord = 89, YCoord = 77, ImageURL = "Hope this works",
-                                         Reward = 100, DogID = 2 };
-            DogDto Dog3 = new DogDto() { Name = "Snoopy", Breed = "Beagle", Phone = "1834567",
+                                         Reward = 100, DogID = "2" };
+            var Dog3 = new InMemoryDogEntity() { Name = "Snoopy", Breed = "Beagle", Phone = "1834567",
                                          Email = "neena@hotmail.com", SpecialNotes = "Can do a happy dance",
                                          XCoord = 34, YCoord = 90, ImageURL = "Must research this",
-                                         Reward = 380, DogID = 3 };
-            DogDto Dog4 = new DogDto() { Name = "Santa's Little Helper", Breed = "Greyhound", Phone = "1230567",
+                                         Reward = 380, DogID = "3" };
+            var Dog4 = new InMemoryDogEntity() { Name = "Santa's Little Helper", Breed = "Greyhound", Phone = "1230567",
                                          Email = "cleo@hotmail.com", SpecialNotes = "Eats a lot of crap",
                                          XCoord = 53, YCoord = 83, ImageURL = "Should do a get call",
-                                         DogID = 4 };
-            DogDto Dog5 = new DogDto() { Name = "Cosmo", Breed = "Labrador Retriever", Phone = "1234967",
+                                         DogID = "4" };
+            var Dog5 = new InMemoryDogEntity() { Name = "Cosmo", Breed = "Labrador Retriever", Phone = "1234967",
                                          Email = "dana@hotmail.com", SpecialNotes = "Can read your mind",
                                          XCoord = 39, YCoord = 76, ImageURL = "Where to store image",
-                                         Reward = 888, DogID = 5 };
+                                         Reward = 888, DogID = "5" };
 
             Dogs.Add(Dog1);
             Dogs.Add(Dog2);
@@ -47,27 +50,26 @@ namespace KennelAPI.Services
             Dogs.Add(Dog5);
             Count = 5;
         }
-        public void AddDog(string name, string breed, string phone, string email, string notes, int x, int y, int reward, string imageURL)
+        public void AddDog(IDogEntity dogEntity)
         {
             Count++;
-            Dogs.Add(new DogDto() { DogID = Count, Name = name, Phone = phone, Email = email,
-                                    SpecialNotes = notes, XCoord = x, YCoord = y, Breed = breed,
-                                    Reward = reward, ImageURL = imageURL});
+            Dogs.Add(dogEntity);
         }
 
-        public void DeleteDog(DogDto dogToDelete)
+        public void DeleteDog(IDogEntity dogToDelete)
         {
             Dogs.Remove(dogToDelete);
         }
 
-        public DogDto GetDog(int dogId)
+        public async Task<IDogEntity> GetDog(string dogId)
         {
-            return Dogs.Where(u => u.DogID == dogId).FirstOrDefault();
+            var dog = Dogs.Where(u => u.DogID == dogId).FirstOrDefault();
+            return await Task.FromResult(dog);
         }
 
-        public void UpdateDog(DogDto dogToUpdate)
+        public async void UpdateDog(IDogEntity dogToUpdate)
         {
-            var existingDog = GetDog(dogToUpdate.DogID);
+            var existingDog = await GetDog(dogToUpdate.DogID);
 
             if (existingDog != null)
             {
