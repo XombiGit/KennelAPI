@@ -55,7 +55,6 @@ namespace KennelAPI.Controllers
 
             IDogEntity doggie = dogToDelete.Result;
             _dogRepository.DeleteDog(doggie);
-
             
             _mailService.SendMail("hello", "world");
 
