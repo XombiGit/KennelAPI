@@ -39,34 +39,34 @@ namespace KennelAPI.Controllers
         }
 
         [HttpDelete("{dogId}")]
-        public IActionResult DeleteDog(string dogId)
+        public async Task<IActionResult> DeleteDog(string dogId)
         {
             if (dogId == null)
             {
                 return BadRequest();
             }
 
-            var dogToDelete = _dogRepository.GetDog(dogId);
+            var dogToDelete = await _dogRepository.GetDog(dogId);
 
             if (dogToDelete == null)
             {
                 return NotFound();
             }
 
-            IDogEntity doggie = dogToDelete.Result;
-            _dogRepository.DeleteDog(doggie);
+            _dogRepository.DeleteDog(dogToDelete);
             
+            //TODO
             _mailService.SendMail("hello", "world");
 
             return NoContent();
         }
 
         [HttpPost()]
-        public IActionResult PostDog([FromBody] DogDtoCreation dogDtoCreation)
+        public async Task<IActionResult> PostDog([FromBody] DogDtoCreation dogDtoCreation)
         {
             if (dogDtoCreation == null)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             if (!ModelState.IsValid)
@@ -79,11 +79,11 @@ namespace KennelAPI.Controllers
                 var dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
                 dogEntity.DogID = Guid.NewGuid().ToString();
 
-                _dogRepository.AddDog(dogEntity);
+                await _dogRepository.AddDog(dogEntity);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "500 Bad Request");
+                return StatusCode(500, "500 Internal Server Error");
             }
 
             return Ok(dogDtoCreation);
@@ -99,7 +99,7 @@ namespace KennelAPI.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
             var aDog = await _dogRepository.GetDog(dogId);

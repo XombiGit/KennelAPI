@@ -29,6 +29,7 @@ namespace KennelAPI
                 c.Title = "KennelAPI";
             });
             services.AddSingleton<IDogRepository, DogRepository>();
+            //Create FakeEmailService
             services.AddTransient<IMailService, EmailService>();
         }
 

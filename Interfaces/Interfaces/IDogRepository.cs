@@ -9,8 +9,8 @@ namespace Common.Interfaces
     public interface IDogRepository
     {
         Task<IDogEntity> GetDog(string dogId);
-        void AddDog(IDogEntity dogEntity);
-        void DeleteDog(IDogEntity dogToDelete);
+        Task AddDog(IDogEntity dogEntity);
+        void DeleteDog(IDogEntity dogEntity);
         void UpdateDog(IDogEntity dogToUpdate);
     }
 }

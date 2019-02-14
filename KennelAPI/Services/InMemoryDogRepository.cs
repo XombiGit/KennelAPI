@@ -50,10 +50,11 @@ namespace KennelAPI.Services
             Dogs.Add(Dog5);
             Count = 5;
         }
-        public void AddDog(IDogEntity dogEntity)
+        public Task AddDog(IDogEntity dogEntity)
         {
             Count++;
             Dogs.Add(dogEntity);
+            return Task.CompletedTask;
         }
 
         public void DeleteDog(IDogEntity dogToDelete)
