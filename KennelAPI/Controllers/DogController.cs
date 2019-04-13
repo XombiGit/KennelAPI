@@ -4,11 +4,14 @@ using Common.Interfaces;
 using Common.Interfaces.Services;
 using KennelAPI.Models;
 using KennelAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoPersistence.Entities;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace KennelAPI.Controllers
@@ -26,13 +29,36 @@ namespace KennelAPI.Controllers
         }
 
         [HttpGet("{dogId}")]
+        //[Authorize("Bearer")]
         public async Task<IActionResult> GetDog(string dogId)
         {
+            /*var identity = (ClaimsIdentity)User.Identity;
+            IEnumerable<Claim> claims = identity.Claims;
+
+            var x = User.Claims;*/
+            //Add token check to all other functions Post, Delete, Put and test as well
+            var bearerToken = Request.Headers["Authorization"];
+            var actualToken = bearerToken.FirstOrDefault();
+            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
+
+            var claims = jwtToken.Claims;
+            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+            
+            if(userId == null)
+            {
+                return Unauthorized(); //Create a test check this one
+            }
+
             var dog = await _dogRepository.GetDog(dogId);
 
             if (dog == null)
             {
                 return NotFound();
+            }
+
+            if(dog.OwnerID != userId.Value)
+            {
+                return Unauthorized();
             }
 
             return Ok(dog);
@@ -53,7 +79,7 @@ namespace KennelAPI.Controllers
                 return NotFound();
             }
 
-            _dogRepository.DeleteDog(dogToDelete);
+            await _dogRepository.DeleteDog(dogToDelete);
             
             //TODO
             _mailService.SendMail("hello", "world");
@@ -63,7 +89,8 @@ namespace KennelAPI.Controllers
 
         [HttpPost()]
         public async Task<IActionResult> PostDog([FromBody] DogDtoCreation dogDtoCreation)
-        {
+        { 
+
             if (dogDtoCreation == null)
             {
                 return BadRequest();
@@ -74,9 +101,11 @@ namespace KennelAPI.Controllers
                 return BadRequest(ModelState);
             }
 
+            IDogEntity dogEntity;
+
             try
             {
-                var dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
+                dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
                 dogEntity.DogID = Guid.NewGuid().ToString();
 
                 await _dogRepository.AddDog(dogEntity);
@@ -86,7 +115,7 @@ namespace KennelAPI.Controllers
                 return StatusCode(500, "500 Internal Server Error");
             }
 
-            return Ok(dogDtoCreation);
+            return Ok(dogEntity);
         }
 
         [HttpPut("{dogId}")]
@@ -99,11 +128,12 @@ namespace KennelAPI.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                //return BadRequest(ModelState); returns object
+                return BadRequest();
             }
 
             var aDog = await _dogRepository.GetDog(dogId);
-            var dogEntity = aDog.Clone();
+            var dogEntity = aDog?.Clone();
 
             if (dogEntity == null)
             {

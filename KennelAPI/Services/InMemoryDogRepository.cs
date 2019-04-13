@@ -57,9 +57,13 @@ namespace KennelAPI.Services
             return Task.CompletedTask;
         }
 
-        public void DeleteDog(IDogEntity dogToDelete)
+        public Task<bool> DeleteDog(IDogEntity dogToDelete)
         {
             Dogs.Remove(dogToDelete);
+
+            //Todo fix
+
+            return Task.FromResult<bool>(true);
         }
 
         public async Task<IDogEntity> GetDog(string dogId)

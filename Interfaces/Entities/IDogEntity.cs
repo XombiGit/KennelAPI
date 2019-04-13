@@ -16,7 +16,7 @@ namespace Common.Entities
         string SpecialNotes { get; set; }
         int Reward { get; set; }
         string ImageURL { get; set; }
-        int OwnerID { get; set; }
+        string OwnerID { get; set; }
 
         IDogEntity Clone();
     }

@@ -17,6 +17,8 @@ namespace KennelAPI.Models
         public string Phone { get; set; }
         [MaxLength(25, ErrorMessage = "Email can only be 25 characters")]
         public string Email { get; set; }
+
+        //TODO: Fix min an max
         public int XCoord { get; set; }
         public int YCoord { get; set; }
         public string SpecialNotes { get; set; }

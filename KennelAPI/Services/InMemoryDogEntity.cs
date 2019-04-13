@@ -18,7 +18,7 @@ namespace KennelAPI.Services
         public string SpecialNotes { get; set; }
         public int Reward { get; set; }
         public string ImageURL { get; set; }
-        public int OwnerID { get; set; }
+        public string OwnerID { get; set; }
 
         public IDogEntity Clone()
         {

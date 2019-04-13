@@ -27,11 +27,14 @@ namespace MongoPersistence.Services
             await _dogCollection.InsertOneAsync(dog);
         }
 
-        public async void DeleteDog(IDogEntity dogEntity)
+        public async Task<bool> DeleteDog(IDogEntity dogEntity)
         {
             DogEntity dogToDelete = (DogEntity) dogEntity;
             string dogId = dogToDelete.DogID;
-            await _dogCollection.DeleteOneAsync<DogEntity>(p => p.DogID == dogId);
+            DeleteResult result = await _dogCollection.DeleteOneAsync<DogEntity>(p => p.DogID == dogId);
+            long deletedCount = result.DeletedCount;
+
+            return (deletedCount == 1 ? true : false);
         }
 
         public async Task<IDogEntity> GetDog(string dogId)

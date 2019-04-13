@@ -10,7 +10,7 @@ namespace Common.Interfaces
     {
         Task<IDogEntity> GetDog(string dogId);
         Task AddDog(IDogEntity dogEntity);
-        void DeleteDog(IDogEntity dogEntity);
+        Task<bool> DeleteDog(IDogEntity dogEntity);
         void UpdateDog(IDogEntity dogToUpdate);
     }
 }
