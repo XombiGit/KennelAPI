@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MongoPersistence.Entities;
 using MongoPersistence.Services;
-using Swashbuckle.Application;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace KennelAPI
 {
@@ -28,6 +28,7 @@ namespace KennelAPI
         {
             services.AddMvc();
             services.AddSingleton<IDogRepository, DogRepository>();
+            services.AddSingleton<IUserRepository, UserRepository>();
             //Create FakeEmailService
             services.AddTransient<IMailService, EmailService>();
 
@@ -47,7 +48,17 @@ namespace KennelAPI
                     };
                 });
 
-
+            services.AddSwaggerGen(c =>
+            { 
+                c.SwaggerDoc("v1", new Info
+                {
+                    Version = "v1",
+                    Title = "My API",
+                    Description = "My First ASP.NET Core Web API",
+                    TermsOfService = "None",
+                    Contact = new Contact() { Name = "Talking Dotnet", Email = "contact@talkingdotnet.com", Url = "www.talkingdotnet.com" }
+                });
+            });
             //GlobalConfiguration.Configuration
   //.EnableSwagger(c => c.SingleApiVersion("v1", "A title for your API"))
   //.EnableSwaggerUi();
@@ -78,12 +89,17 @@ namespace KennelAPI
             AutoMapper.Mapper.Initialize(cfg =>
             {
                 cfg.CreateMap<DogDtoCreation, DogEntity>();
+                cfg.CreateMap<UserDtoCreation, UserEntity>();
             });
 
-
-
             app.UseAuthentication();
+
             app.UseMvc();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.Run(async (context) =>
             {

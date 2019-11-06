@@ -29,24 +29,23 @@ namespace KennelAPI.Controllers
         }
 
         [HttpGet("{dogId}")]
-        //[Authorize("Bearer")]
         public async Task<IActionResult> GetDog(string dogId)
         {
-            /*var identity = (ClaimsIdentity)User.Identity;
-            IEnumerable<Claim> claims = identity.Claims;
-
-            var x = User.Claims;*/
-            //Add token check to all other functions Post, Delete, Put and test as well
             var bearerToken = Request.Headers["Authorization"];
             var actualToken = bearerToken.FirstOrDefault();
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
+            var tokenSplit = actualToken?.Split(' '); //nullable operator
 
+            if (tokenSplit == null || tokenSplit.Length < 2)
+            {
+                return Unauthorized();
+            }
+            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
             var claims = jwtToken.Claims;
             var userId = claims.FirstOrDefault(c => c.Type == "userId");
             
             if(userId == null)
             {
-                return Unauthorized(); //Create a test check this one
+                return Unauthorized(); //Create a test check this one, how ?
             }
 
             var dog = await _dogRepository.GetDog(dogId);
@@ -67,6 +66,18 @@ namespace KennelAPI.Controllers
         [HttpDelete("{dogId}")]
         public async Task<IActionResult> DeleteDog(string dogId)
         {
+            var bearerToken = Request.Headers["Authorization"];
+            var actualToken = bearerToken.FirstOrDefault();
+            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
+
+            var claims = jwtToken.Claims;
+            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one
+            }
+
             if (dogId == null)
             {
                 return BadRequest();
@@ -79,32 +90,49 @@ namespace KennelAPI.Controllers
                 return NotFound();
             }
 
-            await _dogRepository.DeleteDog(dogToDelete);
-            
-            //TODO
-            _mailService.SendMail("hello", "world");
+            if (dogToDelete.OwnerID != userId.Value)
+            {
+                return Unauthorized();
+            }
 
+            //after removing dog, it goes to Dispose, why ?
+            await _dogRepository.DeleteDog(dogToDelete);
+         
             return NoContent();
+            //TODO
+            //_mailService.SendMail("hello", "world");
         }
 
         [HttpPost()]
         public async Task<IActionResult> PostDog([FromBody] DogDtoCreation dogDtoCreation)
-        { 
+        {
+            var bearerToken = Request.Headers["Authorization"];
+            var actualToken = bearerToken.FirstOrDefault();
+            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
+
+            var claims = jwtToken.Claims;
+            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one
+            }
 
             if (dogDtoCreation == null)
             {
                 return BadRequest();
             }
-
+            //If I test once in another method, do i need to test in another as well ?
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
             IDogEntity dogEntity;
 
             try
             {
+                //how to link dogID with userID, pass userID in from ?
                 dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
                 dogEntity.DogID = Guid.NewGuid().ToString();
 
@@ -112,6 +140,7 @@ namespace KennelAPI.Controllers
             }
             catch (Exception ex)
             {
+                //How to mock this ?
                 return StatusCode(500, "500 Internal Server Error");
             }
 
@@ -121,11 +150,24 @@ namespace KennelAPI.Controllers
         [HttpPut("{dogId}")]
         public async Task<ActionResult> PutDog(string dogId, [FromBody] DogDtoUpdate dogDtoUpdate)
         {
+            var bearerToken = Request.Headers["Authorization"];
+            var actualToken = bearerToken.FirstOrDefault();
+            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
+
+            var claims = jwtToken.Claims;
+            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one
+            }
+
             if (dogId == null || dogDtoUpdate == null)
             {
                 return BadRequest();
             }
 
+            //ModelState can't truly be tested since I'm setting the errors for the model state
             if (!ModelState.IsValid)
             {
                 //return BadRequest(ModelState); returns object
@@ -138,6 +180,11 @@ namespace KennelAPI.Controllers
             if (dogEntity == null)
             {
                 return NotFound();
+            }
+
+            if (dogEntity.OwnerID != userId.Value)
+            {
+                return Unauthorized();
             }
 
             if (dogDtoUpdate.Email != null)

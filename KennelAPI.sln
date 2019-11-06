@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoPersistence", "MongoPe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Interfaces\Common.csproj", "{6A252672-AE04-4C50-AA17-801010D0E030}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{DA8D4FC6-92EF-4D7A-BE07-BBA20756D38E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{DA8D4FC6-92EF-4D7A-BE07-BBA20756D38E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityAPI", "IdentityAPI\IdentityAPI.csproj", "{F6B05964-CE1B-4632-823E-604B9E43D813}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{DA8D4FC6-92EF-4D7A-BE07-BBA20756D38E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA8D4FC6-92EF-4D7A-BE07-BBA20756D38E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA8D4FC6-92EF-4D7A-BE07-BBA20756D38E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6B05964-CE1B-4632-823E-604B9E43D813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B05964-CE1B-4632-823E-604B9E43D813}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6B05964-CE1B-4632-823E-604B9E43D813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6B05964-CE1B-4632-823E-604B9E43D813}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
