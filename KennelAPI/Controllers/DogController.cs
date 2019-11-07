@@ -28,6 +28,7 @@ namespace KennelAPI.Controllers
             _mailService = mailService;
         }
 
+        [Authorize]
         [HttpGet("{dogId}")]
         public async Task<IActionResult> GetDog(string dogId)
         {

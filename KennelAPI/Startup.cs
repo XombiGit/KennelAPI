@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Owin.Security.OAuth;
 using MongoPersistence.Entities;
 using MongoPersistence.Services;
 using Swashbuckle.AspNetCore.Swagger;
@@ -31,6 +32,18 @@ namespace KennelAPI
             services.AddSingleton<IUserRepository, UserRepository>();
             //Create FakeEmailService
             services.AddTransient<IMailService, EmailService>();
+
+            OAuthAuthorizationServerOptions OAuthServerOptions = new OAuthAuthorizationServerOptions()
+            {
+                AllowInsecureHttp = true,
+                TokenEndpointPath = new Microsoft.Owin.PathString("/token"),
+                AccessTokenExpireTimeSpan = TimeSpan.FromDays(1),
+                Provider = new SimpleAuthorizationServerProvider()
+            };
+
+            services.AddAuthentication().AddOAuth("", o =>
+                o.
+            )
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -62,6 +75,14 @@ namespace KennelAPI
             //GlobalConfiguration.Configuration
   //.EnableSwagger(c => c.SingleApiVersion("v1", "A title for your API"))
   //.EnableSwaggerUi();
+        }
+
+        public void ConfigureOAuth(IApplicationBuilder app)
+        {
+             // Token Generation
+            app.UseOAuthAuthorizationServer(OAuthServerOptions);
+            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
