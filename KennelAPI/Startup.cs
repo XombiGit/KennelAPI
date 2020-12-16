@@ -17,12 +17,21 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security.OAuth;
 using MongoPersistence.Entities;
 using MongoPersistence.Services;
+using Microsoft.Extensions.Configuration;
 using Swashbuckle.AspNetCore.Swagger;
+using IdentityAPI;
 
 namespace KennelAPI
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -32,34 +41,6 @@ namespace KennelAPI
             services.AddSingleton<IUserRepository, UserRepository>();
             //Create FakeEmailService
             services.AddTransient<IMailService, EmailService>();
-
-            OAuthAuthorizationServerOptions OAuthServerOptions = new OAuthAuthorizationServerOptions()
-            {
-                AllowInsecureHttp = true,
-                TokenEndpointPath = new Microsoft.Owin.PathString("/token"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromDays(1),
-                Provider = new SimpleAuthorizationServerProvider()
-            };
-
-            services.AddAuthentication().AddOAuth("", o =>
-                o.
-            )
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.SaveToken = true;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        //ValidateIssuer = true,
-                        //ValidateAudience = true,
-                        //ValidateLifetime = true,
-                        //ValidateIssuerSigningKey = true,
-                        //ValidIssuer = "",
-                        //ValidAudience = "",
-                        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(""))
-                    };
-                });
 
             services.AddSwaggerGen(c =>
             { 
@@ -72,17 +53,34 @@ namespace KennelAPI
                     Contact = new Contact() { Name = "Talking Dotnet", Email = "contact@talkingdotnet.com", Url = "www.talkingdotnet.com" }
                 });
             });
+
+            // configure strongly typed settings objects
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            // configure jwt authentication
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
             //GlobalConfiguration.Configuration
-  //.EnableSwagger(c => c.SingleApiVersion("v1", "A title for your API"))
-  //.EnableSwaggerUi();
-        }
-
-        public void ConfigureOAuth(IApplicationBuilder app)
-        {
-             // Token Generation
-            app.UseOAuthAuthorizationServer(OAuthServerOptions);
-            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
-
+            //.EnableSwagger(c => c.SingleApiVersion("v1", "A title for your API"))
+            //.EnableSwaggerUi();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -113,8 +111,9 @@ namespace KennelAPI
                 cfg.CreateMap<UserDtoCreation, UserEntity>();
             });
 
-            app.UseAuthentication();
+            
 
+            app.UseAuthentication();
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c =>

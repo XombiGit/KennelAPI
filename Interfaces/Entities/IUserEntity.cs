@@ -7,9 +7,9 @@ namespace Common.Entities
     public interface IUserEntity
     {
         string UserID { get; set; }
-        string Name { get; set; }
-        string Phone { get; set; }
-        string Email { get; set; }
+        string UserName { get; set; }
+        string Password { get; set; }
+        string Token { get; set; }
 
         IUserEntity Clone();
     }

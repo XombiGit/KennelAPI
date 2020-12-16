@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Entities;
@@ -42,6 +43,13 @@ namespace MongoPersistence.Services
             //IMongoCollection<DogEntity> dogEntity = (IMongoCollection<DogEntity>)_dogCollection;
             var result = await _dogCollection.Find<DogEntity>(p => p.DogID == dogId).FirstOrDefaultAsync();
             return result;
+        }
+
+        public async Task<List<IDogEntity>> GetAllDogs(string ownerId)
+        {
+            List<DogEntity> result = await _dogCollection.Find<DogEntity>(d => d.OwnerID == ownerId).ToListAsync();
+
+            return result.ConvertAll(d => (IDogEntity)d);
         }
 
         public async void UpdateDog(IDogEntity dogToUpdate)

@@ -88,5 +88,10 @@ namespace KennelAPI.Services
                 Dogs[index] = dogToUpdate;
             }
         }
+
+        public Task<List<IDogEntity>> GetAllDogs(string ownerId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

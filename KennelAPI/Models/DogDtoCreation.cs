@@ -33,7 +33,6 @@ namespace KennelAPI.Models
         [Required(ErrorMessage = "ImageURL is required")]
         public string ImageURL { get; set; }
 
-        [Required(ErrorMessage = "OwnerID is required")]
         public string OwnerID { get; set; }
     }
 }

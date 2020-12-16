@@ -2,6 +2,7 @@
 using Common.Entities;
 using Common.Interfaces;
 using Common.Interfaces.Services;
+using KennelAPI.Controllers.Helpers;
 using KennelAPI.Models;
 using KennelAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -29,20 +30,48 @@ namespace KennelAPI.Controllers
         }
 
         [Authorize]
+        [HttpGet("all/{ownerId}")]
+        public async Task<IActionResult> GetAllDogs(string ownerId)
+        {
+            var userId = ControllerHelper.getUserFromToken(Request);
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one, how ?
+            }
+
+            var dogs = await _dogRepository.GetAllDogs(ownerId);
+
+            if (dogs == null)
+            {
+                return NotFound();
+            }
+
+            for (int i = 0; i < dogs.Count(); i++)
+            {
+                if (dogs[i].OwnerID != userId.Value)
+                {
+                    return Unauthorized();
+                }
+            }
+            return Ok(dogs);
+        }
+        [Authorize]
         [HttpGet("{dogId}")]
         public async Task<IActionResult> GetDog(string dogId)
         {
-            var bearerToken = Request.Headers["Authorization"];
+            /*var bearerToken = Request.Headers["Authorization"];
             var actualToken = bearerToken.FirstOrDefault();
             var tokenSplit = actualToken?.Split(' '); //nullable operator
 
-            if (tokenSplit == null || tokenSplit.Length < 2)
+            //if (tokenSplit == null || tokenSplit.Length < 2)
             {
                 return Unauthorized();
             }
             var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
             var claims = jwtToken.Claims;
-            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+            var userId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName);*/
+            var userId = ControllerHelper.getUserFromToken(Request);
             
             if(userId == null)
             {
@@ -67,12 +96,7 @@ namespace KennelAPI.Controllers
         [HttpDelete("{dogId}")]
         public async Task<IActionResult> DeleteDog(string dogId)
         {
-            var bearerToken = Request.Headers["Authorization"];
-            var actualToken = bearerToken.FirstOrDefault();
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
-
-            var claims = jwtToken.Claims;
-            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+            var userId = ControllerHelper.getUserFromToken(Request);
 
             if (userId == null)
             {
@@ -107,12 +131,7 @@ namespace KennelAPI.Controllers
         [HttpPost()]
         public async Task<IActionResult> PostDog([FromBody] DogDtoCreation dogDtoCreation)
         {
-            var bearerToken = Request.Headers["Authorization"];
-            var actualToken = bearerToken.FirstOrDefault();
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
-
-            var claims = jwtToken.Claims;
-            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+            var userId = ControllerHelper.getUserFromToken(Request);
 
             if (userId == null)
             {
@@ -123,6 +142,8 @@ namespace KennelAPI.Controllers
             {
                 return BadRequest();
             }
+
+            dogDtoCreation.OwnerID = userId.Value;
             //If I test once in another method, do i need to test in another as well ?
             if (!ModelState.IsValid)
             {
@@ -151,12 +172,7 @@ namespace KennelAPI.Controllers
         [HttpPut("{dogId}")]
         public async Task<ActionResult> PutDog(string dogId, [FromBody] DogDtoUpdate dogDtoUpdate)
         {
-            var bearerToken = Request.Headers["Authorization"];
-            var actualToken = bearerToken.FirstOrDefault();
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
-
-            var claims = jwtToken.Claims;
-            var userId = claims.FirstOrDefault(c => c.Type == "userId");
+            var userId = ControllerHelper.getUserFromToken(Request);
 
             if (userId == null)
             {

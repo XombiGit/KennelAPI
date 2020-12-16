@@ -14,31 +14,39 @@ namespace IdentityAPI.Controllers
     [Route("/accounts")]
     public class AccountsController : Controller
     {
-        private IAuthRepository _repo = null;
+        private IAuthRepository _authRepository = null;
 
         public AccountsController(IAuthRepository repo)
         {
-            _repo = repo;
+            _authRepository = repo;
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserModel userModel)
+        [HttpPost("Authenticate")]
+        //TODO: Test this method
+        public async Task<IActionResult> Authenticate([FromBody]UserModel userParam)
         {
-            if (!ModelState.IsValid)
+            var user = await _authRepository.Authenticate(userParam);
+
+            if (user == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
+
+            return Ok(user);
+        }
+
+        [HttpPost("Signup")]
+        public async Task<IActionResult> SignupAsync([FromBody]UserModel userParam)
+        {
+            //validate
+            var result = await _authRepository.GetUserByNameAsync(userParam);
+            if (result != null)
             {
-                return BadRequest(ModelState);
+                return StatusCode(409, "409 Username already exists");
             }
+            //create user
+            userParam.UserId = Guid.NewGuid().ToString();
+            var user = await _authRepository.Signup(userParam);
 
-            IdentityResult result = await _repo.RegisterUser(userModel);
-
-            IActionResult errorResult = GetErrorResult(result);
-
-            if (errorResult != null)
-            {
-                return errorResult;
-            }
-
-            return Ok();
+            return Ok(user);
         }
 
         private IActionResult GetErrorResult(IdentityResult result)

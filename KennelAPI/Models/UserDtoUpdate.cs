@@ -8,12 +8,7 @@ namespace KennelAPI.Models
 {
     public class UserDtoUpdate
     {
-        [MaxLength(20)]
-        public string Name { get; set; }
-
-        [MaxLength(10)]
-        public string Phone { get; set; }
-
-        public string Email { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
     }
 }

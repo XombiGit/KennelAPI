@@ -9,6 +9,7 @@ using MongoPersistence.Entities;
 using AutoMapper;
 using Common.Entities;
 using System.IdentityModel.Tokens.Jwt;
+using KennelAPI.Controllers.Helpers;
 
 namespace KennelAPI.Controllers
 {
@@ -25,18 +26,7 @@ namespace KennelAPI.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUser(string userId)
         {
-            var bearerToken = Request.Headers["Authorization"];
-            var actualToken = bearerToken.FirstOrDefault();
-            var tokenSplit = actualToken?.Split(' '); //nullable operator
-
-            if (tokenSplit == null || tokenSplit.Length < 2)
-            {
-                //how to check for length < 2
-                return new UnauthorizedObjectResult(null);
-            }
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
-            var claims = jwtToken.Claims;
-            var userIdFromToken = claims.FirstOrDefault(c => c.Type == "userId");
+            var userIdFromToken = ControllerHelper.getUserFromToken(Request);
 
             if (userIdFromToken == null || userIdFromToken.Value != userId)
             {
@@ -50,54 +40,14 @@ namespace KennelAPI.Controllers
                 return NotFound();
             }
 
+            user.Password = null;
             return Ok(user);
-        }
-
-        [HttpPost()]
-        public async Task<IActionResult> AddUser([FromBody] UserDtoCreation userDtoCreation)
-        {
-            //how to setup token
-            if (userDtoCreation == null)
-            {
-                return NotFound();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            IUserEntity userEntity;
-
-            try
-            {
-                userEntity = Mapper.Map<UserEntity>(userDtoCreation);
-                userEntity.UserID = Guid.NewGuid().ToString();
-                await _userRepository.AddUser(userEntity);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "500 Internal Server Error");
-            }
-
-            return Ok(userDtoCreation);
         }
 
         [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateUsers(string userId, [FromBody] UserDtoUpdate userDtoUpdate)
         {
-            var bearerToken = Request.Headers["Authorization"];
-            var actualToken = bearerToken.FirstOrDefault();
-            var tokenSplit = actualToken?.Split(' '); //nullable operator
-
-            if (tokenSplit == null || tokenSplit.Length < 2)
-            {
-                //how to check for length < 2
-                return new UnauthorizedObjectResult(null);
-            }
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
-            var claims = jwtToken.Claims;
-            var userIdFromToken = claims.FirstOrDefault(c => c.Type == "userId");
+            var userIdFromToken = ControllerHelper.getUserFromToken(Request);
 
             if (userIdFromToken == null || userIdFromToken.Value != userId)
             {
@@ -121,41 +71,27 @@ namespace KennelAPI.Controllers
             {
                 return NotFound();
             }
-
-            if (userDtoUpdate.Email != null)
-            {
-                userToUpdate.Email = userDtoUpdate.Email;
-            }
             
-            if(userDtoUpdate.Name != null)
+            if(userDtoUpdate.UserName != null)
             {
-                userToUpdate.Name = userDtoUpdate.Name;
+                userToUpdate.UserName = userDtoUpdate.UserName;
             }
 
-            if(userDtoUpdate.Phone != null)
+            if(userDtoUpdate.Password != null)
             {
-                userToUpdate.Phone = userDtoUpdate.Phone;
+                userToUpdate.Password = userDtoUpdate.Password;
             }
 
             _userRepository.UpdateUser(userToUpdate);
             return NoContent();
         }
 
-        [HttpDelete("{userId}")]
+        //[HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
-            var bearerToken = Request.Headers["Authorization"];
-            var actualToken = bearerToken.FirstOrDefault();
-            var tokenSplit = actualToken?.Split(' '); //nullable operator
+            //TODO add staff type for admin to allow this function to work
 
-            if (tokenSplit == null || tokenSplit.Length < 2)
-            {
-                //how to check for length < 2
-                return new UnauthorizedObjectResult(null);
-            }
-            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
-            var claims = jwtToken.Claims;
-            var userIdFromToken = claims.FirstOrDefault(c => c.Type == "userId");
+            var userIdFromToken = ControllerHelper.getUserFromToken(Request);
 
             if (userIdFromToken == null || userIdFromToken.Value != userId)
             {
