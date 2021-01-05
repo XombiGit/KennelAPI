@@ -2,11 +2,11 @@
 {
     "comment" : "This file is used to help set default values when using the dotnet CLI extension Amazon.ElasticBeanstalk.Tools. For more information run \"dotnet eb --help\" from the project root.",
     "profile" : "DevOne",
-    "region"  : "us-west-2",
+    "region"  : "us-east-1",
     "application" : "IdentityAPI",
-    "environment" : "IdentityAPI-dev0",
+    "environment" : "cesartest2",
     "cname"       : "identityapi-dev",
-    "solution-stack" : "64bit Windows Server Core 2016 v2.6.0 running IIS 10.0",
+    "solution-stack" : "64bit Windows Server 2019 v2.6.0 running IIS 10.0",
     "environment-type" : "SingleInstance",
     "instance-profile" : "aws-elasticbeanstalk-ec2-role",
     "service-role"     : "aws-elasticbeanstalk-service-role",
@@ -21,5 +21,5 @@
     "self-contained"   : false,
     "enhanced-health-type" : "basic",
     "additional-options"   : "",
-    "proxy-server"         : "nginx"
+    "proxy-server"         : "none"
 }
