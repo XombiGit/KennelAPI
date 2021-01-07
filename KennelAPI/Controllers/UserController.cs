@@ -5,10 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Interfaces;
+using MongoPersistence.Entities;
+using AutoMapper;
+using Common.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using KennelAPI.Controllers.Helpers;
 
 namespace KennelAPI.Controllers
 {
-   /* [Route("api/users")]
+    [Route("api/users")]
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepository;
@@ -19,100 +24,96 @@ namespace KennelAPI.Controllers
         }
 
         [HttpGet("{userId}")]
-        public IActionResult GetUser(int userId)
+        public async Task<IActionResult> GetUser(string userId)
         {
-            var user = _userRepository.GetUser(userId);
+            var userIdFromToken = ControllerHelper.getUserFromToken(Request);
+
+            if (userIdFromToken == null || userIdFromToken.Value != userId)
+            {
+                return new UnauthorizedObjectResult(null);
+            }
+
+            var user = await _userRepository.GetUser(userId);
 
             if (user == null)
             {
                 return NotFound();
             }
 
+            user.Password = null;
             return Ok(user);
         }
 
-        [HttpPost()]
-        public IActionResult AddUser([FromBody] UserDtoCreation userDtoCreation)
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> UpdateUsers(string userId, [FromBody] UserDtoUpdate userDtoUpdate)
         {
-            if (userDtoCreation == null)
+            var userIdFromToken = ControllerHelper.getUserFromToken(Request);
+
+            if (userIdFromToken == null || userIdFromToken.Value != userId)
             {
-                return NotFound();
+                return new UnauthorizedObjectResult(null);
             }
 
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || userDtoUpdate == null)
             {
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                _userRepository.AddUser(userDtoCreation.Name, userDtoCreation.Phone, userDtoCreation.Email);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "500 Bad Request");
-            }
-
-            return Ok(userDtoCreation);
-        }
-
-        [HttpPut("{userId}")]
-        public IActionResult UpdateUsers(int userId, [FromBody] UserDtoUpdate userDtoUpdate)
-        {
-            if (userId == null || userDtoUpdate == null)
+            /*if(!ModelState.IsValid)
             {
                 return BadRequest();
-            }
+            }*/
 
-            if(!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
+            var userToUpdate = await _userRepository.GetUser(userId);
+            var userEntity = userToUpdate?.Clone();
 
-            var userToUpdate = _userRepository.GetUser(userId).Clone();
-
-            if(userToUpdate == null)
+            if (userToUpdate == null)
             {
                 return NotFound();
             }
-
-            if (userDtoUpdate.Email != null)
-            {
-                userToUpdate.Email = userDtoUpdate.Email;
-            }
             
-            if(userDtoUpdate.Name != null)
+            if(userDtoUpdate.UserName != null)
             {
-                userToUpdate.Name = userDtoUpdate.Name;
+                userToUpdate.UserName = userDtoUpdate.UserName;
             }
 
-            if(userDtoUpdate.Phone != null)
+            if(userDtoUpdate.Password != null)
             {
-                userToUpdate.Phone = userDtoUpdate.Phone;
+                userToUpdate.Password = userDtoUpdate.Password;
             }
 
             _userRepository.UpdateUser(userToUpdate);
             return NoContent();
         }
 
-        [HttpDelete("{userId}")]
-        public IActionResult DeleteUser(int userId)
+        //[HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
         {
-            if(userId == null)
+            //TODO add staff type for admin to allow this function to work
+
+            var userIdFromToken = ControllerHelper.getUserFromToken(Request);
+
+            if (userIdFromToken == null || userIdFromToken.Value != userId)
             {
-                return BadRequest();
+                return new UnauthorizedObjectResult(null);
             }
 
-            var userToDelete =_userRepository.GetUser(userId);
+            if (userId == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userToDelete = await _userRepository.GetUser(userId);
 
             if(userToDelete == null)
             {
-                return NotFound();
+                //return NotFound();
+                return new UnauthorizedObjectResult(null);
             }
 
             _userRepository.DeleteUser(userToDelete);
 
             return NoContent();
         }
-    }*/
+    }
 }

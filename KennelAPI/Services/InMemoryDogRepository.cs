@@ -50,15 +50,20 @@ namespace KennelAPI.Services
             Dogs.Add(Dog5);
             Count = 5;
         }
-        public void AddDog(IDogEntity dogEntity)
+        public Task AddDog(IDogEntity dogEntity)
         {
             Count++;
             Dogs.Add(dogEntity);
+            return Task.CompletedTask;
         }
 
-        public void DeleteDog(IDogEntity dogToDelete)
+        public Task<bool> DeleteDog(IDogEntity dogToDelete)
         {
             Dogs.Remove(dogToDelete);
+
+            //Todo fix
+
+            return Task.FromResult<bool>(true);
         }
 
         public async Task<IDogEntity> GetDog(string dogId)
@@ -82,6 +87,11 @@ namespace KennelAPI.Services
             {
                 Dogs[index] = dogToUpdate;
             }
+        }
+
+        public Task<List<IDogEntity>> GetAllDogs(string ownerId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

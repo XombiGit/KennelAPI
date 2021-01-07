@@ -12,7 +12,7 @@ namespace MongoPersistence
 
         public MongoConnectionManager()
         {
-            _mongoDb = Initialize("mongodb://Xombi:$BigHero6@ds041167.mlab.com:41167/xombikennel");
+            _mongoDb = Initialize("mongodb://Xombi:BritanniaKelpieChoir@cluster0-shard-00-00.rfzxh.mongodb.net:27017,cluster0-shard-00-01.rfzxh.mongodb.net:27017,cluster0-shard-00-02.rfzxh.mongodb.net:27017/Kennel?ssl=true&replicaSet=atlas-4gfla6-shard-0&authSource=admin&retryWrites=true&w=majority");
         }
 
         private IMongoDatabase Initialize(string connectionString)

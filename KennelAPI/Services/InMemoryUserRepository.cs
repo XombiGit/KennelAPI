@@ -1,4 +1,5 @@
-﻿using Common.Interfaces;
+﻿using Common.Entities;
+using Common.Interfaces;
 using KennelAPI.Models;
 using System;
 using System.Collections.Generic;
@@ -63,6 +64,26 @@ namespace KennelAPI.Services
             {
                 Users[index] = userToUpdate;
             }
+        }
+
+        public Task<IUserEntity> GetUser(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddUser(IUserEntity userEntity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteUser(IUserEntity dogEntity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateUser(IUserEntity dogToUpdate)
+        {
+            throw new NotImplementedException();
         }
     }
 }

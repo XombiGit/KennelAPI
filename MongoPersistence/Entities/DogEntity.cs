@@ -12,7 +12,7 @@ namespace MongoPersistence.Entities
         [BsonId]
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string _id { get; set; }
-
+        //difference between 2 ids ?
         public string DogID { get; set; }
         public string Name { get; set; }
         public string Breed { get; set; }
@@ -23,7 +23,7 @@ namespace MongoPersistence.Entities
         public string SpecialNotes { get; set; }
         public int Reward { get; set; }
         public string ImageURL { get; set; }
-        public int OwnerID { get; set; }
+        public string OwnerID { get; set; }
 
         public IDogEntity Clone()
         {

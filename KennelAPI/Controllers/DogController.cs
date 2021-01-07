@@ -2,13 +2,17 @@
 using Common.Entities;
 using Common.Interfaces;
 using Common.Interfaces.Services;
+using KennelAPI.Controllers.Helpers;
 using KennelAPI.Models;
 using KennelAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoPersistence.Entities;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace KennelAPI.Controllers
@@ -25,9 +29,55 @@ namespace KennelAPI.Controllers
             _mailService = mailService;
         }
 
+        [Authorize]
+        [HttpGet("all/{ownerId}")]
+        public async Task<IActionResult> GetAllDogs(string ownerId)
+        {
+            var userId = ControllerHelper.getUserFromToken(Request);
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one, how ?
+            }
+
+            var dogs = await _dogRepository.GetAllDogs(ownerId);
+
+            if (dogs == null)
+            {
+                return NotFound();
+            }
+
+            for (int i = 0; i < dogs.Count(); i++)
+            {
+                if (dogs[i].OwnerID != userId.Value)
+                {
+                    return Unauthorized();
+                }
+            }
+            return Ok(dogs);
+        }
+        [Authorize]
         [HttpGet("{dogId}")]
         public async Task<IActionResult> GetDog(string dogId)
         {
+            /*var bearerToken = Request.Headers["Authorization"];
+            var actualToken = bearerToken.FirstOrDefault();
+            var tokenSplit = actualToken?.Split(' '); //nullable operator
+
+            //if (tokenSplit == null || tokenSplit.Length < 2)
+            {
+                return Unauthorized();
+            }
+            var jwtToken = new JwtSecurityToken(actualToken.Split(' ')[1]);
+            var claims = jwtToken.Claims;
+            var userId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName);*/
+            var userId = ControllerHelper.getUserFromToken(Request);
+            
+            if(userId == null)
+            {
+                return Unauthorized(); //Create a test check this one, how ?
+            }
+
             var dog = await _dogRepository.GetDog(dogId);
 
             if (dog == null)
@@ -35,79 +85,123 @@ namespace KennelAPI.Controllers
                 return NotFound();
             }
 
+            if(dog.OwnerID != userId.Value)
+            {
+                return Unauthorized();
+            }
+
             return Ok(dog);
         }
 
         [HttpDelete("{dogId}")]
-        public IActionResult DeleteDog(string dogId)
+        public async Task<IActionResult> DeleteDog(string dogId)
         {
+            var userId = ControllerHelper.getUserFromToken(Request);
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one
+            }
+
             if (dogId == null)
             {
                 return BadRequest();
             }
 
-            var dogToDelete = _dogRepository.GetDog(dogId);
+            var dogToDelete = await _dogRepository.GetDog(dogId);
 
             if (dogToDelete == null)
             {
                 return NotFound();
             }
 
-            IDogEntity doggie = dogToDelete.Result;
-            _dogRepository.DeleteDog(doggie);
-            
-            _mailService.SendMail("hello", "world");
+            if (dogToDelete.OwnerID != userId.Value)
+            {
+                return Unauthorized();
+            }
 
+            //after removing dog, it goes to Dispose, why ?
+            await _dogRepository.DeleteDog(dogToDelete);
+         
             return NoContent();
+            //TODO
+            //_mailService.SendMail("hello", "world");
         }
 
         [HttpPost()]
-        public IActionResult PostDog([FromBody] DogDtoCreation dogDtoCreation)
+        public async Task<IActionResult> PostDog([FromBody] DogDtoCreation dogDtoCreation)
         {
-            if (dogDtoCreation == null)
+            var userId = ControllerHelper.getUserFromToken(Request);
+
+            if (userId == null)
             {
-                return NotFound();
+                return Unauthorized(); //Create a test check this one
             }
 
+            if (dogDtoCreation == null)
+            {
+                return BadRequest();
+            }
+
+            dogDtoCreation.OwnerID = userId.Value;
+            //If I test once in another method, do i need to test in another as well ?
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
+
+            IDogEntity dogEntity;
 
             try
             {
-                var dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
+                //how to link dogID with userID, pass userID in from ?
+                dogEntity = Mapper.Map<DogEntity>(dogDtoCreation);
                 dogEntity.DogID = Guid.NewGuid().ToString();
 
-                _dogRepository.AddDog(dogEntity);
+                await _dogRepository.AddDog(dogEntity);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "500 Bad Request");
+                //How to mock this ?
+                return StatusCode(500, "500 Internal Server Error");
             }
 
-            return Ok(dogDtoCreation);
+            return Ok(dogEntity);
         }
 
         [HttpPut("{dogId}")]
         public async Task<ActionResult> PutDog(string dogId, [FromBody] DogDtoUpdate dogDtoUpdate)
         {
+            var userId = ControllerHelper.getUserFromToken(Request);
+
+            if (userId == null)
+            {
+                return Unauthorized(); //Create a test check this one
+            }
+
             if (dogId == null || dogDtoUpdate == null)
             {
                 return BadRequest();
             }
 
+            //ModelState can't truly be tested since I'm setting the errors for the model state
             if (!ModelState.IsValid)
             {
+                //return BadRequest(ModelState); returns object
                 return BadRequest();
             }
 
             var aDog = await _dogRepository.GetDog(dogId);
-            var dogEntity = aDog.Clone();
+            var dogEntity = aDog?.Clone();
 
             if (dogEntity == null)
             {
                 return NotFound();
+            }
+
+            if (dogEntity.OwnerID != userId.Value)
+            {
+                return Unauthorized();
             }
 
             if (dogDtoUpdate.Email != null)
