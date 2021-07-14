@@ -107,6 +107,7 @@ namespace KennelAPI
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
+                cfg.CreateMap<DogEntity, DogDto>();
                 cfg.CreateMap<DogDtoCreation, DogEntity>();
                 cfg.CreateMap<UserDtoCreation, UserEntity>();
             });

@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/KennelAPI",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:57118/",
       "sslPort": 0
@@ -17,11 +21,17 @@
     },
     "KennelAPI": {
       "commandName": "Project",
-      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:57119/"
+      "applicationUrl": "http://127.0.0.1:57119/"
+    },
+    "Local IIS": {
+      "commandName": "IIS",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Value"
+      }
     }
   }
 }

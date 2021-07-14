@@ -18,7 +18,7 @@ namespace KennelAPI
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            WebHost.CreateDefaultBuilder(args).UseUrls("http://*:57119")
                 .UseStartup<Startup>()
                 .Build();
     }

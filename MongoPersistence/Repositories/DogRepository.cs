@@ -57,7 +57,7 @@ namespace MongoPersistence.Services
             //var existingDog = await GetDog(dogToUpdate.DogID);
             DogEntity existingDog = (DogEntity) dogToUpdate;
             string dogId = existingDog.DogID;
-            string breed = existingDog.Breed;
+            //string breed = existingDog.Breed;
 
             var filter = Builders<DogEntity>.Filter.Eq(m => m.DogID, dogId);
 

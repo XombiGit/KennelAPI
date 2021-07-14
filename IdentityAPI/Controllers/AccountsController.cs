@@ -48,7 +48,7 @@ namespace IdentityAPI.Controllers
 
             return Ok(user);
         }
-
+        
         private IActionResult GetErrorResult(IdentityResult result)
         {
             if (result == null)

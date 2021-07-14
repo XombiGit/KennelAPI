@@ -2,6 +2,7 @@
 using Common.Entities;
 using Common.Interfaces;
 using Common.Interfaces.Services;
+using Common.Models;
 using KennelAPI.Controllers.Helpers;
 using KennelAPI.Models;
 using KennelAPI.Services;
@@ -89,8 +90,11 @@ namespace KennelAPI.Controllers
             {
                 return Unauthorized();
             }
-
-            return Ok(dog);
+                
+            DogDto dto = Mapper.Map<DogDto>(dog);
+            dto.statusDescription = DogStatus.statusDictionary[dto.dogStatus];
+      
+            return Ok(dto);
         }
 
         [HttpDelete("{dogId}")]
@@ -204,7 +208,7 @@ namespace KennelAPI.Controllers
                 return Unauthorized();
             }
 
-            if (dogDtoUpdate.Email != null)
+            /*if (dogDtoUpdate.Email != null)
             {
                 dogEntity.Email = dogDtoUpdate.Email;
             }
@@ -229,6 +233,11 @@ namespace KennelAPI.Controllers
                 dogEntity.SpecialNotes = dogDtoUpdate.SpecialNotes;
             }
 
+            if (dogDtoUpdate.Reward != 0)
+            {
+                dogEntity.Reward = dogDtoUpdate.Reward;
+            }*/
+
             if (dogDtoUpdate.XCoord != 0)
             {
                 dogEntity.XCoord = dogDtoUpdate.XCoord;
@@ -239,16 +248,10 @@ namespace KennelAPI.Controllers
                 dogEntity.YCoord = dogDtoUpdate.YCoord;
             }
 
-            if (dogDtoUpdate.Reward != 0)
-            {
-                dogEntity.Reward = dogDtoUpdate.Reward;
-            }
-
             if (dogDtoUpdate.ImageURL != null)
             {
                 dogEntity.ImageURL = dogDtoUpdate.ImageURL;
             }
-
 
             _dogRepository.UpdateDog(dogEntity);
             return NoContent();
